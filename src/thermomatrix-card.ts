@@ -6,7 +6,7 @@ import type {
   ThermoMatrixConfig,
 } from "./types";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 const WORKING_ACTIONS = new Set(["heating", "cooling", "drying", "fan"]);
 
 const MODE_META: Record<string, { label: string; icon: string; color: string }> =
@@ -35,6 +35,19 @@ const SEGMENTS: Record<string, string> = {
 };
 
 const LETTERS: Record<string, string[]> = {
+  A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+  B: ["11110", "10001", "10001", "11110", "10001", "10001", "11110"],
+  C: ["01111", "10000", "10000", "10000", "10000", "10000", "01111"],
+  G: ["01111", "10000", "10000", "10111", "10001", "10001", "01111"],
+  H: ["10001", "10001", "10001", "11111", "10001", "10001", "10001"],
+  M: ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
+  P: ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
+  R: ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
+  S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
+  T: ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
+  U: ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
+  V: ["10001", "10001", "10001", "10001", "10001", "01010", "00100"],
+  Z: ["11111", "00001", "00010", "00100", "01000", "10000", "11111"],
   O: ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
   N: ["10001", "11001", "11001", "10101", "10011", "10011", "10001"],
   I: ["11111", "00100", "00100", "00100", "00100", "00100", "11111"],
@@ -42,6 +55,12 @@ const LETTERS: Record<string, string[]> = {
   L: ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
   E: ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
   F: ["11111", "10000", "10000", "11110", "10000", "10000", "10000"],
+  J: ["00111", "00010", "00010", "00010", "10010", "10010", "01100"],
+  K: ["10001", "10010", "10100", "11000", "10100", "10010", "10001"],
+  Q: ["01110", "10001", "10001", "10001", "10101", "10010", "01101"],
+  W: ["10001", "10001", "10001", "10101", "10101", "10101", "01010"],
+  X: ["10001", "10001", "01010", "00100", "01010", "10001", "10001"],
+  Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
 };
 
 const PRESET_META: Record<string, { label: string; color: string }> = {
@@ -80,6 +99,10 @@ export class ThermoMatrixCard extends LitElement {
           selector: { entity: { domain: "sensor" } },
         },
         {
+          name: "status_entity",
+          selector: { entity: {} },
+        },
+        {
           name: "border_mode",
           selector: {
             select: {
@@ -105,13 +128,16 @@ export class ThermoMatrixCard extends LitElement {
           show_presets: "Mostra preset",
           show_consumption: "Mostra consumo",
           power_entity: "Sensore di consumo",
+          status_entity: "Sensore di stato avanzato",
           border_mode: "Bordo della card",
           temperature_step: "Incremento temperatura",
         })[schema.name ?? ""] ?? schema.name,
       computeHelper: (schema: { name?: string }) =>
         schema.name === "power_entity"
           ? "Usato soltanto quando il modulo consumo è attivo."
-          : undefined,
+          : schema.name === "status_entity"
+            ? "Opzionale. Se assente, viene usato lo stato del climatizzatore."
+            : undefined,
     };
   }
 
@@ -187,6 +213,7 @@ export class ThermoMatrixCard extends LitElement {
           ${this._renderTemperatureControls(climate)}
           ${this._renderPresets(climate)}
           ${this._renderConsumption()}
+          ${this._renderOperatingStatus(climate)}
           <div class="brand">
             ${this._config.name ??
             (climate.attributes.friendly_name as string | undefined) ??
@@ -398,10 +425,68 @@ export class ThermoMatrixCard extends LitElement {
 
     return html`
       <div class="consumption ${active ? "active" : ""}">
-        <span>⚡</span>
-        <span>Consumo attuale</span>
-        <span>${power ? `${power.state} ${unit}`.trim() : "Non disponibile"}</span>
+        <span class="consumption-icon">⚡</span>
+        <span class="consumption-label">
+          ${this._renderMatrixWord("CONSUMO")}
+        </span>
+        <span class="consumption-value">
+          ${power
+            ? html`${this._renderLcdNumber(power.state)}
+                <span class="consumption-unit">${unit}</span>`
+            : html`<span class="unavailable">Non disponibile</span>`}
+        </span>
       </div>
+    `;
+  }
+
+  private _renderOperatingStatus(climate: HassEntity): TemplateResult {
+    const external = this._config.status_entity
+      ? this.hass.states[this._config.status_entity]
+      : undefined;
+    const fallback = String(
+      climate.attributes.hvac_action ?? climate.state ?? "non disponibile",
+    );
+    const rawState = external?.state ?? fallback;
+    const label = this._humanize(rawState).toUpperCase();
+
+    return html`
+      <div class="operating-status">
+        <span class="operating-status-label">
+          ${this._renderMatrixWord("STATO")}
+        </span>
+        <span class="operating-status-value" title=${label}>
+          ${this._renderMatrixWord(label)}
+        </span>
+      </div>
+    `;
+  }
+
+  private _renderLcdNumber(value: unknown): TemplateResult {
+    const numeric = Number(value);
+    const formatted = Number.isFinite(numeric)
+      ? String(Math.round(numeric * 10) / 10)
+      : "--";
+
+    return html`
+      <span class="lcd-display lcd-number">
+        ${[...formatted].map((character) =>
+          character === "."
+            ? html`<i class="lcd-dot"></i>`
+            : this._renderDigit(character),
+        )}
+      </span>
+    `;
+  }
+
+  private _renderMatrixWord(value: string): TemplateResult {
+    return html`
+      <span class="matrix-word">
+        ${[...value].map((character) =>
+          character === " "
+            ? html`<span class="matrix-space"></span>`
+            : this._renderMatrixChar(character),
+        )}
+      </span>
     `;
   }
 

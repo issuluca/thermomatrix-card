@@ -309,22 +309,85 @@ export const thermoMatrixStyles = css`
 
   .consumption {
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 8px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
     align-items: center;
-    min-height: 46px;
-    padding: 0 14px;
+    min-height: 58px;
+    padding: 7px 14px;
     border: 2px solid var(--tm-neutral-border);
     border-radius: 14px;
     box-sizing: border-box;
-    font-size: 12px;
-    font-weight: 700;
   }
 
   .consumption.active {
     border-color: #0ea5e9;
     background: rgba(14, 165, 233, 0.22);
     box-shadow: 0 0 12px rgba(14, 165, 233, 0.42);
+  }
+
+  .consumption-icon {
+    font-size: 18px;
+  }
+
+  .consumption-label,
+  .operating-status-label {
+    opacity: 0.72;
+  }
+
+  .consumption-value {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 6px;
+    font-size: 29px;
+    line-height: 1;
+  }
+
+  .consumption-unit {
+    padding-bottom: 2px;
+    font: 800 11px/1 Arial, sans-serif;
+    letter-spacing: 0.06em;
+  }
+
+  .unavailable {
+    font: 700 11px/1.2 Arial, sans-serif;
+  }
+
+  .lcd-number {
+    font-size: 29px;
+  }
+
+  .matrix-space {
+    display: inline-block;
+    width: 4px;
+  }
+
+  .operating-status {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 34px;
+    padding: 5px 12px;
+    overflow: hidden;
+    border: 1px solid var(--tm-neutral-border);
+    border-radius: 9px;
+    box-sizing: border-box;
+    background: color-mix(
+      in srgb,
+      var(--primary-text-color) 5%,
+      transparent
+    );
+  }
+
+  .operating-status-value {
+    min-width: 0;
+    overflow: hidden;
+    justify-self: end;
+  }
+
+  .operating-status-value .matrix-word {
+    gap: 2px;
+    white-space: nowrap;
   }
 
   .brand {

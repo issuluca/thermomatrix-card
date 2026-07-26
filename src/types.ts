@@ -25,6 +25,7 @@ export interface ThermoMatrixConfig {
   show_presets?: boolean;
   show_consumption?: boolean;
   power_entity?: string;
+  status_entity?: string;
   border_mode?: BorderMode;
   temperature_step?: number;
 }
