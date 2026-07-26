@@ -98,6 +98,11 @@ export const thermoMatrixStyles = css`
     align-items: center;
   }
 
+  .lcd-values.external {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.66fr);
+    gap: 18px;
+  }
+
   .lcd-reading {
     min-width: 0;
   }
@@ -232,21 +237,25 @@ export const thermoMatrixStyles = css`
   }
 
   .lcd-external-status {
-    position: relative;
-    left: 4px;
     display: flex;
-    min-width: 0;
-    min-height: 70px;
+    width: 100%;
+    min-height: 28px;
+    margin-top: 9px;
+    padding-top: 7px;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    border-top: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+    box-sizing: border-box;
     text-align: center;
   }
 
   .lcd-external-status .matrix-word {
     max-width: 100%;
     justify-content: center;
-    gap: 2px;
+    gap: 1.4px;
+    --matrix-pixel-size: 1.05px;
+    --matrix-pixel-gap: 0.42px;
   }
 
   .status-box {
@@ -289,14 +298,14 @@ export const thermoMatrixStyles = css`
 
   .matrix-char {
     display: grid;
-    grid-template-columns: repeat(5, 1.4px);
-    grid-template-rows: repeat(7, 1.4px);
-    gap: 0.55px;
+    grid-template-columns: repeat(5, var(--matrix-pixel-size, 1.4px));
+    grid-template-rows: repeat(7, var(--matrix-pixel-size, 1.4px));
+    gap: var(--matrix-pixel-gap, 0.55px);
   }
 
   .matrix-pixel {
-    width: 1.4px;
-    height: 1.4px;
+    width: var(--matrix-pixel-size, 1.4px);
+    height: var(--matrix-pixel-size, 1.4px);
     border-radius: 0.3px;
     background: currentColor;
     opacity: 0.1;
@@ -313,7 +322,8 @@ export const thermoMatrixStyles = css`
   }
 
   .temperature-controls button {
-    min-height: 40px;
+    min-height: 30px;
+    padding: 2px 8px;
     border-width: 1px;
     border-radius: 10px;
     background: color-mix(
@@ -322,7 +332,8 @@ export const thermoMatrixStyles = css`
       transparent
     );
     box-shadow: none;
-    font-size: 24px;
+    font-size: 19px;
+    line-height: 1;
   }
 
   .consumption {
@@ -355,7 +366,18 @@ export const thermoMatrixStyles = css`
   }
 
   .consumption-label {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
     opacity: 0.72;
+  }
+
+  .preset-icon {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 17px;
+    line-height: 1;
   }
 
   .consumption-value {

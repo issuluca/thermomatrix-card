@@ -6,7 +6,7 @@ import type {
   ThermoMatrixConfig,
 } from "./types";
 
-const VERSION = "0.2.1";
+const VERSION = "0.2.2";
 const WORKING_ACTIONS = new Set(["heating", "cooling", "drying", "fan"]);
 
 const MODE_META: Record<string, { label: string; icon: string; color: string }> =
@@ -14,7 +14,7 @@ const MODE_META: Record<string, { label: string; icon: string; color: string }> 
     off: { label: "Spento", icon: "⏻", color: "#94a3b8" },
     heat: { label: "Caldo", icon: "♨", color: "#f97316" },
     cool: { label: "Freddo", icon: "❄", color: "#1d4ed8" },
-    dry: { label: "Dry", icon: "◉", color: "#10b981" },
+    dry: { label: "Deumidifica", icon: "💧", color: "#10b981" },
     fan_only: { label: "Ventola", icon: "✣", color: "#0891b2" },
     auto: { label: "Auto", icon: "A", color: "#8b5cf6" },
     heat_cool: { label: "Auto", icon: "↕", color: "#8b5cf6" },
@@ -63,13 +63,16 @@ const LETTERS: Record<string, string[]> = {
   Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
 };
 
-const PRESET_META: Record<string, { label: string; color: string }> = {
-  none: { label: "Manuale", color: "#c026d3" },
-  home: { label: "Home", color: "#1d4ed8" },
-  away: { label: "Away", color: "#94a3b8" },
-  sleep: { label: "Sleep", color: "#8b5cf6" },
-  comfort: { label: "Comfort", color: "#10b981" },
-  eco: { label: "Eco", color: "#16a34a" },
+const PRESET_META: Record<
+  string,
+  { label: string; icon: string; color: string }
+> = {
+  none: { label: "Manuale", icon: "✋", color: "#c026d3" },
+  home: { label: "Casa", icon: "⌂", color: "#1d4ed8" },
+  away: { label: "Assente", icon: "↗", color: "#94a3b8" },
+  sleep: { label: "Notte", icon: "☾", color: "#8b5cf6" },
+  comfort: { label: "Comfort", icon: "♥", color: "#10b981" },
+  eco: { label: "Eco", icon: "♻", color: "#16a34a" },
 };
 
 export class ThermoMatrixCard extends LitElement {
@@ -288,38 +291,41 @@ export class ThermoMatrixCard extends LitElement {
         class="lcd-panel ${dark ? "dark" : ""}"
         style=${`--lcd-background:${background}`}
       >
-        <div class="lcd-values">
+        <div class="lcd-values ${this._config.status_entity ? "external" : ""}">
           <div class="lcd-reading current">
             <span class="lcd-reading-label">AMBIENTE</span>
             ${this._renderTemperature(climate.attributes.current_temperature)}
           </div>
-          ${this._config.status_entity
+          ${!this._config.status_entity
             ? html`
-                <div
-                  class="lcd-external-status"
-                  title=${externalStatus
-                    ? this._humanize(externalStatus.state)
-                    : "Sensore non disponibile"}
-                >
-                  ${this._renderMatrixWord(
-                    externalStatus
-                      ? this._humanize(externalStatus.state).toUpperCase()
-                      : "N D",
-                  )}
-                </div>
-              `
-            : html`
                 <div class="status-stack">
                   ${this._renderStatus("ON", isOn, true)}
                   ${this._renderStatus("IDLE", isIdle, true)}
                   ${this._renderStatus("OFF", isOff, false)}
                 </div>
-              `}
+              `
+            : nothing}
           <div class="lcd-reading target">
             <span class="lcd-reading-label">TARGET</span>
             ${this._renderTemperature(climate.attributes.temperature)}
           </div>
         </div>
+        ${this._config.status_entity
+          ? html`
+              <div
+                class="lcd-external-status"
+                title=${externalStatus
+                  ? this._humanize(externalStatus.state)
+                  : "Sensore non disponibile"}
+              >
+                ${this._renderMatrixWord(
+                  externalStatus
+                    ? this._humanize(externalStatus.state).toUpperCase()
+                    : "NON DISPONIBILE",
+                )}
+              </div>
+            `
+          : nothing}
       </div>
     `;
   }
@@ -416,6 +422,7 @@ export class ThermoMatrixCard extends LitElement {
         ${presets.map((preset) => {
           const meta = PRESET_META[preset] ?? {
             label: this._humanize(preset),
+            icon: "◆",
             color: "#64748b",
           };
           return html`
@@ -424,7 +431,8 @@ export class ThermoMatrixCard extends LitElement {
               style=${`--button-color:${meta.color}`}
               @click=${() => this._setPreset(preset)}
             >
-              ${meta.label}
+              <span class="preset-icon">${meta.icon}</span>
+              <span>${meta.label}</span>
             </button>
           `;
         })}
