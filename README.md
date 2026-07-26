@@ -3,8 +3,8 @@
 Una card Lovelace modulare in stile LCD per controllare entità `climate` in
 Home Assistant.
 
-> Stato del progetto: prima versione di sviluppo. Non ancora pubblicata su
-> HACS.
+> Stato del progetto: versione di sviluppo installabile come archivio
+> personalizzato HACS.
 
 ## Funzioni già previste
 
@@ -13,7 +13,8 @@ Home Assistant.
 - indicatori LCD `ON`, `IDLE` e `OFF`;
 - regolazione della temperatura;
 - preset generati automaticamente e disattivabili;
-- modulo opzionale per un sensore di consumo;
+- modulo opzionale per un sensore di consumo, con valore a sette segmenti;
+- indicatore inferiore dello stato operativo;
 - bordo dinamico secondo la modalità o neutro;
 - adattamento al tema chiaro e scuro;
 - configurazione dall'editor visuale di Home Assistant.
@@ -39,6 +40,27 @@ show_consumption: true
 power_entity: sensor.climatizzatore_power
 border_mode: state
 ```
+
+### Stato operativo avanzato
+
+L'indicatore inferiore usa normalmente l'attributo `hvac_action` dell'entità
+`climate` (con fallback allo stato principale).
+
+È possibile indicare un'entità separata tramite `status_entity` per mostrare
+stati specifici, ad esempio `In attivazione` o `In spegnimento`, ricavati da
+un'automazione o dal sensore di consumo:
+
+```yaml
+type: custom:thermomatrix-card
+entity: climate.termostato_sala
+status_entity: sensor.stato_climatizzatore
+show_consumption: true
+power_entity: sensor.climatizzatore_power
+```
+
+`status_entity` è una funzione opzionale pensata per impianti che espongono
+fasi operative aggiuntive. Non è necessaria per il normale funzionamento della
+card.
 
 ## Sviluppo
 
