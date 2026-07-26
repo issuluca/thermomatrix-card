@@ -17,6 +17,8 @@ Home Assistant.
 - stato operativo avanzato opzionale all'interno del display LCD;
 - bordo dinamico secondo la modalità o neutro;
 - adattamento al tema chiaro e scuro;
+- lingua rilevata automaticamente da Home Assistant, con possibilità di
+  selezione manuale;
 - configurazione dall'editor visuale di Home Assistant.
 
 ## Configurazione di sviluppo
@@ -28,7 +30,22 @@ show_presets: true
 show_consumption: false
 border_mode: state
 temperature_step: 0.1
+language: auto
 ```
+
+## Lingue
+
+Il valore predefinito `language: auto` usa la lingua del profilo Home
+Assistant. Se la lingua non è ancora supportata, la card utilizza l'inglese.
+
+Le traduzioni incluse sono inglese, italiano, spagnolo, francese, tedesco e
+portoghese. È anche possibile forzare una lingua:
+
+```yaml
+language: es
+```
+
+I valori ammessi sono `auto`, `en`, `it`, `es`, `fr`, `de` e `pt`.
 
 Con il modulo consumo:
 
@@ -45,8 +62,9 @@ border_mode: state
 
 È possibile indicare un'entità separata tramite `status_entity` per mostrare
 stati specifici, ad esempio `In attivazione` o `In spegnimento`, ricavati da
-un'automazione o dal sensore di consumo. Il testo viene mostrato al centro del
-display LCD e sostituisce gli indicatori `ON`, `IDLE` e `OFF`:
+un'automazione o dal sensore di consumo. Il testo viene mostrato su una riga a
+tutta larghezza sotto le temperature, dentro il display LCD, e sostituisce gli
+indicatori `ON`, `IDLE` e `OFF`:
 
 ```yaml
 type: custom:thermomatrix-card
