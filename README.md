@@ -14,7 +14,7 @@ Home Assistant.
 - regolazione della temperatura;
 - preset generati automaticamente e disattivabili;
 - modulo opzionale per un sensore di consumo, con valore a sette segmenti;
-- indicatore inferiore dello stato operativo;
+- stato operativo avanzato opzionale all'interno del display LCD;
 - bordo dinamico secondo la modalità o neutro;
 - adattamento al tema chiaro e scuro;
 - configurazione dall'editor visuale di Home Assistant.
@@ -43,12 +43,10 @@ border_mode: state
 
 ### Stato operativo avanzato
 
-L'indicatore inferiore usa normalmente l'attributo `hvac_action` dell'entità
-`climate` (con fallback allo stato principale).
-
 È possibile indicare un'entità separata tramite `status_entity` per mostrare
 stati specifici, ad esempio `In attivazione` o `In spegnimento`, ricavati da
-un'automazione o dal sensore di consumo:
+un'automazione o dal sensore di consumo. Il testo viene mostrato al centro del
+display LCD e sostituisce gli indicatori `ON`, `IDLE` e `OFF`:
 
 ```yaml
 type: custom:thermomatrix-card
@@ -59,8 +57,8 @@ power_entity: sensor.climatizzatore_power
 ```
 
 `status_entity` è una funzione opzionale pensata per impianti che espongono
-fasi operative aggiuntive. Non è necessaria per il normale funzionamento della
-card.
+fasi operative aggiuntive. Se non viene configurata, la card mantiene i normali
+indicatori `ON`, `IDLE` e `OFF` e non aggiunge altri riquadri.
 
 ## Sviluppo
 
