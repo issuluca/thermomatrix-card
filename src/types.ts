@@ -9,6 +9,9 @@ export interface HomeAssistant {
   themes?: {
     darkMode?: boolean;
   };
+  locale?: {
+    language?: string;
+  };
   callService(
     domain: string,
     service: string,
@@ -26,6 +29,7 @@ export interface ThermoMatrixConfig {
   show_consumption?: boolean;
   power_entity?: string;
   status_entity?: string;
+  language?: "auto" | "en" | "it" | "es" | "fr" | "de" | "pt";
   border_mode?: BorderMode;
   temperature_step?: number;
 }
