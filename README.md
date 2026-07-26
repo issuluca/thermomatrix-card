@@ -3,6 +3,8 @@
 Una card Lovelace modulare in stile LCD per controllare entità `climate` in
 Home Assistant.
 
+![ThermoMatrix Card preview](assets/preview.svg)
+
 > Stato del progetto: versione di sviluppo installabile come archivio
 > personalizzato HACS.
 
@@ -106,4 +108,4 @@ Il repository finale conterrà `hacs.json` nella radice e
 
 ## Licenza
 
-Da definire prima della prima pubblicazione.
+Distribuito con licenza [MIT](LICENSE).
