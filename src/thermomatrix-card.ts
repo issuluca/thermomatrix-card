@@ -6,18 +6,17 @@ import type {
   ThermoMatrixConfig,
 } from "./types";
 
-const VERSION = "0.2.2";
+const VERSION = "0.3.0";
 const WORKING_ACTIONS = new Set(["heating", "cooling", "drying", "fan"]);
 
-const MODE_META: Record<string, { label: string; icon: string; color: string }> =
-  {
-    off: { label: "Spento", icon: "⏻", color: "#94a3b8" },
-    heat: { label: "Caldo", icon: "♨", color: "#f97316" },
-    cool: { label: "Freddo", icon: "❄", color: "#1d4ed8" },
-    dry: { label: "Deumidifica", icon: "💧", color: "#10b981" },
-    fan_only: { label: "Ventola", icon: "✣", color: "#0891b2" },
-    auto: { label: "Auto", icon: "A", color: "#8b5cf6" },
-    heat_cool: { label: "Auto", icon: "↕", color: "#8b5cf6" },
+const MODE_META: Record<string, { icon: string; color: string }> = {
+    off: { icon: "mdi:power", color: "#94a3b8" },
+    heat: { icon: "mdi:fire", color: "#f97316" },
+    cool: { icon: "mdi:snowflake", color: "#1d4ed8" },
+    dry: { icon: "mdi:water-percent", color: "#10b981" },
+    fan_only: { icon: "mdi:fan", color: "#0891b2" },
+    auto: { icon: "mdi:thermostat-auto", color: "#8b5cf6" },
+    heat_cool: { icon: "mdi:autorenew", color: "#8b5cf6" },
   };
 
 const SEGMENTS: Record<string, string> = {
@@ -63,16 +62,28 @@ const LETTERS: Record<string, string[]> = {
   Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
 };
 
-const PRESET_META: Record<
-  string,
-  { label: string; icon: string; color: string }
-> = {
-  none: { label: "Manuale", icon: "✋", color: "#c026d3" },
-  home: { label: "Casa", icon: "⌂", color: "#1d4ed8" },
-  away: { label: "Assente", icon: "↗", color: "#94a3b8" },
-  sleep: { label: "Notte", icon: "☾", color: "#8b5cf6" },
-  comfort: { label: "Comfort", icon: "♥", color: "#10b981" },
-  eco: { label: "Eco", icon: "♻", color: "#16a34a" },
+const PRESET_META: Record<string, { icon: string; color: string }> = {
+  none: { icon: "mdi:hand-back-right", color: "#c026d3" },
+  home: { icon: "mdi:home", color: "#1d4ed8" },
+  away: { icon: "mdi:bag-checked", color: "#94a3b8" },
+  sleep: { icon: "mdi:sleep", color: "#8b5cf6" },
+  comfort: { icon: "mdi:sofa", color: "#10b981" },
+  eco: { icon: "mdi:leaf", color: "#16a34a" },
+};
+
+type Language = "en" | "it" | "es" | "fr" | "de" | "pt";
+type TranslationKey =
+  | "loading" | "unavailable" | "environment" | "target" | "consumption"
+  | "off" | "heat" | "cool" | "dry" | "fan_only" | "auto" | "heat_cool"
+  | "none" | "home" | "away" | "sleep" | "comfort" | "eco";
+
+const TRANSLATIONS: Record<Language, Record<TranslationKey, string>> = {
+  en: { loading: "Loading…", unavailable: "Unavailable", environment: "ROOM", target: "TARGET", consumption: "POWER", off: "Off", heat: "Heat", cool: "Cool", dry: "Dry", fan_only: "Fan", auto: "Auto", heat_cool: "Auto", none: "Manual", home: "Home", away: "Away", sleep: "Sleep", comfort: "Comfort", eco: "Eco" },
+  it: { loading: "Caricamento…", unavailable: "Non disponibile", environment: "AMBIENTE", target: "TARGET", consumption: "CONSUMO", off: "Spento", heat: "Caldo", cool: "Freddo", dry: "Deumidifica", fan_only: "Ventola", auto: "Auto", heat_cool: "Auto", none: "Manuale", home: "Casa", away: "Assente", sleep: "Notte", comfort: "Comfort", eco: "Eco" },
+  es: { loading: "Cargando…", unavailable: "No disponible", environment: "AMBIENTE", target: "OBJETIVO", consumption: "CONSUMO", off: "Apagado", heat: "Calor", cool: "Frío", dry: "Deshumidificar", fan_only: "Ventilador", auto: "Auto", heat_cool: "Auto", none: "Manual", home: "Casa", away: "Ausente", sleep: "Noche", comfort: "Confort", eco: "Eco" },
+  fr: { loading: "Chargement…", unavailable: "Indisponible", environment: "AMBIANCE", target: "CIBLE", consumption: "PUISSANCE", off: "Arrêt", heat: "Chauffage", cool: "Froid", dry: "Déshumidifier", fan_only: "Ventilateur", auto: "Auto", heat_cool: "Auto", none: "Manuel", home: "Maison", away: "Absent", sleep: "Nuit", comfort: "Confort", eco: "Éco" },
+  de: { loading: "Laden…", unavailable: "Nicht verfügbar", environment: "RAUM", target: "ZIEL", consumption: "LEISTUNG", off: "Aus", heat: "Heizen", cool: "Kühlen", dry: "Entfeuchten", fan_only: "Lüfter", auto: "Auto", heat_cool: "Auto", none: "Manuell", home: "Zuhause", away: "Abwesend", sleep: "Nacht", comfort: "Komfort", eco: "Eco" },
+  pt: { loading: "A carregar…", unavailable: "Indisponível", environment: "AMBIENTE", target: "ALVO", consumption: "CONSUMO", off: "Desligado", heat: "Aquecer", cool: "Arrefecer", dry: "Desumidificar", fan_only: "Ventoinha", auto: "Auto", heat_cool: "Auto", none: "Manual", home: "Casa", away: "Ausente", sleep: "Noite", comfort: "Conforto", eco: "Eco" },
 };
 
 export class ThermoMatrixCard extends LitElement {
@@ -106,13 +117,30 @@ export class ThermoMatrixCard extends LitElement {
           selector: { entity: {} },
         },
         {
+          name: "language",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                { value: "auto", label: "Automatic (Home Assistant)" },
+                { value: "en", label: "English" },
+                { value: "it", label: "Italiano" },
+                { value: "es", label: "Español" },
+                { value: "fr", label: "Français" },
+                { value: "de", label: "Deutsch" },
+                { value: "pt", label: "Português" },
+              ],
+            },
+          },
+        },
+        {
           name: "border_mode",
           selector: {
             select: {
               mode: "dropdown",
               options: [
-                { value: "state", label: "Colorato secondo lo stato" },
-                { value: "neutral", label: "Neutro" },
+                { value: "state", label: "State color" },
+                { value: "neutral", label: "Neutral" },
               ],
             },
           },
@@ -126,20 +154,21 @@ export class ThermoMatrixCard extends LitElement {
       ],
       computeLabel: (schema: { name?: string }) =>
         ({
-          entity: "Climatizzatore",
-          name: "Nome personalizzato",
-          show_presets: "Mostra preset",
-          show_consumption: "Mostra consumo",
-          power_entity: "Sensore di consumo",
-          status_entity: "Sensore di stato avanzato",
-          border_mode: "Bordo della card",
-          temperature_step: "Incremento temperatura",
+          entity: "Climate entity",
+          name: "Custom name",
+          show_presets: "Show presets",
+          show_consumption: "Show power consumption",
+          power_entity: "Power sensor",
+          status_entity: "Advanced status sensor",
+          language: "Language",
+          border_mode: "Card border",
+          temperature_step: "Temperature step",
         })[schema.name ?? ""] ?? schema.name,
       computeHelper: (schema: { name?: string }) =>
         schema.name === "power_entity"
-          ? "Usato soltanto quando il modulo consumo è attivo."
+          ? "Used only when the power module is enabled."
           : schema.name === "status_entity"
-            ? "Opzionale. Se assente, viene usato lo stato del climatizzatore."
+            ? "Optional. Replaces ON, IDLE and OFF inside the LCD."
             : undefined,
     };
   }
@@ -160,15 +189,16 @@ export class ThermoMatrixCard extends LitElement {
       show_presets: true,
       show_consumption: false,
       border_mode: "state",
+      language: "auto",
     };
   }
 
   public setConfig(config: ThermoMatrixConfig): void {
     if (!config?.entity) {
-      throw new Error("ThermoMatrix Card richiede un'entità climate.");
+      throw new Error("ThermoMatrix Card requires a climate entity.");
     }
     if (!config.entity.startsWith("climate.")) {
-      throw new Error("L'entità configurata deve appartenere al dominio climate.");
+      throw new Error("The configured entity must use the climate domain.");
     }
 
     this._config = {
@@ -176,6 +206,7 @@ export class ThermoMatrixCard extends LitElement {
       show_presets: config.show_presets ?? true,
       show_consumption: config.show_consumption ?? false,
       border_mode: config.border_mode ?? "state",
+      language: config.language ?? "auto",
     };
   }
 
@@ -185,14 +216,14 @@ export class ThermoMatrixCard extends LitElement {
 
   protected render(): TemplateResult {
     if (!this.hass || !this._config) {
-      return html`<ha-card><div class="warning">Caricamento…</div></ha-card>`;
+      return html`<ha-card><div class="warning">${this._t("loading")}</div></ha-card>`;
     }
 
     const climate = this.hass.states[this._config.entity];
     if (!climate) {
       return html`<ha-card>
         <div class="warning">
-          Entità ${this._config.entity} non disponibile
+          ${this._config.entity}: ${this._t("unavailable")}
         </div>
       </ha-card>`;
     }
@@ -237,19 +268,19 @@ export class ThermoMatrixCard extends LitElement {
       >
         ${visibleModes.map((mode) => {
           const meta = MODE_META[mode] ?? {
-            label: this._humanize(mode),
-            icon: "●",
+            icon: "mdi:radiobox-blank",
             color: "#64748b",
           };
+          const label = this._translateValue(mode);
           return html`
             <button
               class="mode-button ${climate.state === mode ? "active" : ""}"
               style=${`--button-color:${meta.color}`}
-              title=${`Imposta ${meta.label}`}
+              title=${label}
               @click=${() => this._setHvacMode(mode)}
             >
-              <span class="mode-icon">${meta.icon}</span>
-              ${meta.label}
+              <ha-icon class="mode-icon" icon=${meta.icon}></ha-icon>
+              ${label}
             </button>
           `;
         })}
@@ -293,7 +324,7 @@ export class ThermoMatrixCard extends LitElement {
       >
         <div class="lcd-values ${this._config.status_entity ? "external" : ""}">
           <div class="lcd-reading current">
-            <span class="lcd-reading-label">AMBIENTE</span>
+            <span class="lcd-reading-label">${this._t("environment")}</span>
             ${this._renderTemperature(climate.attributes.current_temperature)}
           </div>
           ${!this._config.status_entity
@@ -306,7 +337,7 @@ export class ThermoMatrixCard extends LitElement {
               `
             : nothing}
           <div class="lcd-reading target">
-            <span class="lcd-reading-label">TARGET</span>
+            <span class="lcd-reading-label">${this._t("target")}</span>
             ${this._renderTemperature(climate.attributes.temperature)}
           </div>
         </div>
@@ -316,12 +347,12 @@ export class ThermoMatrixCard extends LitElement {
                 class="lcd-external-status"
                 title=${externalStatus
                   ? this._humanize(externalStatus.state)
-                  : "Sensore non disponibile"}
+                  : this._t("unavailable")}
               >
                 ${this._renderMatrixWord(
                   externalStatus
                     ? this._humanize(externalStatus.state).toUpperCase()
-                    : "NON DISPONIBILE",
+                    : this._t("unavailable").toUpperCase(),
                 )}
               </div>
             `
@@ -421,18 +452,18 @@ export class ThermoMatrixCard extends LitElement {
       >
         ${presets.map((preset) => {
           const meta = PRESET_META[preset] ?? {
-            label: this._humanize(preset),
-            icon: "◆",
+            icon: "mdi:bookmark-outline",
             color: "#64748b",
           };
+          const label = this._translateValue(preset);
           return html`
             <button
               class=${activePreset === preset ? "active" : ""}
               style=${`--button-color:${meta.color}`}
               @click=${() => this._setPreset(preset)}
             >
-              <span class="preset-icon">${meta.icon}</span>
-              <span>${meta.label}</span>
+              <ha-icon class="preset-icon" icon=${meta.icon}></ha-icon>
+              <span>${label}</span>
             </button>
           `;
         })}
@@ -469,13 +500,13 @@ export class ThermoMatrixCard extends LitElement {
       >
         <span class="consumption-icon">⚡</span>
         <span class="consumption-label">
-          ${this._renderMatrixWord("CONSUMO")}
+          ${this._renderMatrixWord(this._t("consumption").toUpperCase())}
         </span>
         <span class="consumption-value">
           ${power
             ? html`${this._renderLcdNumber(power.state)}
                 <span class="consumption-unit">${unit}</span>`
-            : html`<span class="unavailable">Non disponibile</span>`}
+            : html`<span class="unavailable">${this._t("unavailable")}</span>`}
         </span>
       </div>
     `;
@@ -555,6 +586,25 @@ export class ThermoMatrixCard extends LitElement {
     return value
       .replaceAll("_", " ")
       .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
+
+  private _language(): Language {
+    const configured = this._config.language ?? "auto";
+    const requested =
+      configured === "auto"
+        ? String(this.hass.locale?.language ?? "en").toLowerCase().split("-")[0]
+        : configured;
+    return requested in TRANSLATIONS ? (requested as Language) : "en";
+  }
+
+  private _t(key: TranslationKey): string {
+    return TRANSLATIONS[this._language()][key] ?? TRANSLATIONS.en[key];
+  }
+
+  private _translateValue(value: string): string {
+    return value in TRANSLATIONS.en
+      ? this._t(value as TranslationKey)
+      : this._humanize(value);
   }
 }
 
