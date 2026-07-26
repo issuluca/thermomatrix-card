@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#111827"/>
+      <stop offset="1" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="lcd" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1e3a5f"/>
+      <stop offset="1" stop-color="#172554"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="900" height="520" rx="28" fill="url(#bg)"/>
+  <rect x="18" y="18" width="864" height="484" rx="24" fill="none" stroke="#2563eb" stroke-width="3"/>
+  <g font-family="Arial, sans-serif" text-anchor="middle">
+    <g fill="#e2e8f0" font-size="18" font-weight="700">
+      <rect x="42" y="44" width="188" height="62" rx="14" fill="#1e293b" stroke="#64748b"/>
+      <text x="136" y="82">OFF</text>
+      <rect x="248" y="44" width="188" height="62" rx="14" fill="#7c2d12" stroke="#f97316"/>
+      <text x="342" y="82">HEAT</text>
+      <rect x="454" y="44" width="188" height="62" rx="14" fill="#172554" stroke="#3b82f6"/>
+      <text x="548" y="82">COOL</text>
+      <rect x="660" y="44" width="198" height="62" rx="14" fill="#064e3b" stroke="#10b981"/>
+      <text x="759" y="82">DRY</text>
+    </g>
+    <rect x="42" y="128" width="816" height="206" rx="18" fill="url(#lcd)" stroke="#93c5fd" stroke-width="2"/>
+    <g fill="#bfdbfe">
+      <text x="180" y="170" font-size="14" font-weight="700" letter-spacing="3">ROOM</text>
+      <text x="718" y="170" font-size="14" font-weight="700" letter-spacing="3">TARGET</text>
+      <text x="190" y="254" font-family="monospace" font-size="82" font-weight="700" filter="url(#glow)">23.4°</text>
+      <text x="714" y="244" font-family="monospace" font-size="56" font-weight="700" filter="url(#glow)">21.0°</text>
+      <text x="450" y="310" font-family="monospace" font-size="17" font-weight="700" letter-spacing="4">HEATING</text>
+    </g>
+    <g fill="#e2e8f0" font-size="28">
+      <rect x="42" y="352" width="395" height="44" rx="10" fill="#1e293b" stroke="#475569"/>
+      <text x="239" y="383">−</text>
+      <rect x="463" y="352" width="395" height="44" rx="10" fill="#1e293b" stroke="#475569"/>
+      <text x="660" y="383">+</text>
+    </g>
+    <rect x="42" y="414" width="816" height="58" rx="14" fill="#166534" stroke="#4ade80"/>
+    <text x="168" y="450" fill="#dcfce7" font-size="15" font-weight="700" letter-spacing="3">POWER</text>
+    <text x="730" y="453" fill="#dcfce7" font-family="monospace" font-size="32" font-weight="700">428 W</text>
+    <text x="450" y="492" fill="#94a3b8" font-size="12" font-weight="700" letter-spacing="4">THERMOMATRIX</text>
+  </g>
+</svg>
