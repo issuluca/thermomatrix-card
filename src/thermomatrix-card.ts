@@ -6,7 +6,7 @@ import type {
   ThermoMatrixConfig,
 } from "./types";
 
-const VERSION = "0.3.0";
+const VERSION = "0.3.1";
 const WORKING_ACTIONS = new Set(["heating", "cooling", "drying", "fan"]);
 
 const MODE_META: Record<string, { icon: string; color: string }> = {
