@@ -6,7 +6,7 @@ import type {
   ThermoMatrixConfig,
 } from "./types";
 
-const VERSION = "0.2.0";
+const VERSION = "0.2.1";
 const WORKING_ACTIONS = new Set(["heating", "cooling", "drying", "fan"]);
 
 const MODE_META: Record<string, { label: string; icon: string; color: string }> =
@@ -213,7 +213,6 @@ export class ThermoMatrixCard extends LitElement {
           ${this._renderTemperatureControls(climate)}
           ${this._renderPresets(climate)}
           ${this._renderConsumption()}
-          ${this._renderOperatingStatus(climate)}
           <div class="brand">
             ${this._config.name ??
             (climate.attributes.friendly_name as string | undefined) ??
@@ -261,6 +260,9 @@ export class ThermoMatrixCard extends LitElement {
     const isOn = WORKING_ACTIONS.has(action);
     const isIdle = mode !== "off" && action === "idle";
     const isOff = mode === "off";
+    const externalStatus = this._config.status_entity
+      ? this.hass.states[this._config.status_entity]
+      : undefined;
     const dark = this.hass.themes?.darkMode === true;
     const backgrounds = dark
       ? {
@@ -291,11 +293,28 @@ export class ThermoMatrixCard extends LitElement {
             <span class="lcd-reading-label">AMBIENTE</span>
             ${this._renderTemperature(climate.attributes.current_temperature)}
           </div>
-          <div class="status-stack">
-            ${this._renderStatus("ON", isOn, true)}
-            ${this._renderStatus("IDLE", isIdle, true)}
-            ${this._renderStatus("OFF", isOff, false)}
-          </div>
+          ${this._config.status_entity
+            ? html`
+                <div
+                  class="lcd-external-status"
+                  title=${externalStatus
+                    ? this._humanize(externalStatus.state)
+                    : "Sensore non disponibile"}
+                >
+                  ${this._renderMatrixWord(
+                    externalStatus
+                      ? this._humanize(externalStatus.state).toUpperCase()
+                      : "N D",
+                  )}
+                </div>
+              `
+            : html`
+                <div class="status-stack">
+                  ${this._renderStatus("ON", isOn, true)}
+                  ${this._renderStatus("IDLE", isIdle, true)}
+                  ${this._renderStatus("OFF", isOff, false)}
+                </div>
+              `}
           <div class="lcd-reading target">
             <span class="lcd-reading-label">TARGET</span>
             ${this._renderTemperature(climate.attributes.temperature)}
@@ -420,11 +439,26 @@ export class ThermoMatrixCard extends LitElement {
 
     const power = this.hass.states[this._config.power_entity];
     const numeric = Number(power?.state);
-    const active = Number.isFinite(numeric) && numeric > 5;
+    const active = Number.isFinite(numeric) && numeric > 20;
     const unit = String(power?.attributes.unit_of_measurement ?? "");
+    const displayPower = Number.isFinite(numeric) ? numeric : 0;
+    const ratio = Math.min(1, Math.max(0, (displayPower - 20) / 1480));
+    const hue = Math.round(120 * (1 - ratio));
+    const dark = this.hass.themes?.darkMode === true;
+    const background =
+      displayPower <= 20
+        ? dark
+          ? "#374151"
+          : "#d1d5db"
+        : dark
+          ? `hsl(${hue} 62% 28%)`
+          : `hsl(${hue} 72% 78%)`;
 
     return html`
-      <div class="consumption ${active ? "active" : ""}">
+      <div
+        class="consumption ${active ? "active" : ""} ${dark ? "dark" : ""}"
+        style=${`--consumption-background:${background}`}
+      >
         <span class="consumption-icon">⚡</span>
         <span class="consumption-label">
           ${this._renderMatrixWord("CONSUMO")}
@@ -434,28 +468,6 @@ export class ThermoMatrixCard extends LitElement {
             ? html`${this._renderLcdNumber(power.state)}
                 <span class="consumption-unit">${unit}</span>`
             : html`<span class="unavailable">Non disponibile</span>`}
-        </span>
-      </div>
-    `;
-  }
-
-  private _renderOperatingStatus(climate: HassEntity): TemplateResult {
-    const external = this._config.status_entity
-      ? this.hass.states[this._config.status_entity]
-      : undefined;
-    const fallback = String(
-      climate.attributes.hvac_action ?? climate.state ?? "non disponibile",
-    );
-    const rawState = external?.state ?? fallback;
-    const label = this._humanize(rawState).toUpperCase();
-
-    return html`
-      <div class="operating-status">
-        <span class="operating-status-label">
-          ${this._renderMatrixWord("STATO")}
-        </span>
-        <span class="operating-status-value" title=${label}>
-          ${this._renderMatrixWord(label)}
         </span>
       </div>
     `;

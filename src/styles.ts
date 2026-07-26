@@ -231,6 +231,24 @@ export const thermoMatrixStyles = css`
     gap: 5px;
   }
 
+  .lcd-external-status {
+    position: relative;
+    left: 4px;
+    display: flex;
+    min-width: 0;
+    min-height: 70px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .lcd-external-status .matrix-word {
+    max-width: 100%;
+    justify-content: center;
+    gap: 2px;
+  }
+
   .status-box {
     width: 50px;
     height: 22px;
@@ -317,20 +335,26 @@ export const thermoMatrixStyles = css`
     border: 2px solid var(--tm-neutral-border);
     border-radius: 14px;
     box-sizing: border-box;
+    color: #111827;
+    background: var(--consumption-background);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.18),
+      0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: background 0.35s ease, border-color 0.35s ease;
   }
 
   .consumption.active {
-    border-color: #0ea5e9;
-    background: rgba(14, 165, 233, 0.22);
-    box-shadow: 0 0 12px rgba(14, 165, 233, 0.42);
+    border-color: color-mix(in srgb, currentColor 34%, transparent);
+  }
+
+  .consumption.dark {
+    color: #f8fafc;
   }
 
   .consumption-icon {
     font-size: 18px;
   }
 
-  .consumption-label,
-  .operating-status-label {
+  .consumption-label {
     opacity: 0.72;
   }
 
@@ -359,35 +383,6 @@ export const thermoMatrixStyles = css`
   .matrix-space {
     display: inline-block;
     width: 4px;
-  }
-
-  .operating-status {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 12px;
-    align-items: center;
-    min-height: 34px;
-    padding: 5px 12px;
-    overflow: hidden;
-    border: 1px solid var(--tm-neutral-border);
-    border-radius: 9px;
-    box-sizing: border-box;
-    background: color-mix(
-      in srgb,
-      var(--primary-text-color) 5%,
-      transparent
-    );
-  }
-
-  .operating-status-value {
-    min-width: 0;
-    overflow: hidden;
-    justify-self: end;
-  }
-
-  .operating-status-value .matrix-word {
-    gap: 2px;
-    white-space: nowrap;
   }
 
   .brand {
