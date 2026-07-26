@@ -928,7 +928,7 @@ const Pt = dt`
     color: var(--error-color, #db4437);
     text-align: center;
   }
-`, Tt = "0.3.0", Ut = /* @__PURE__ */ new Set(["heating", "cooling", "drying", "fan"]), st = {
+`, Tt = "0.3.1", Ut = /* @__PURE__ */ new Set(["heating", "cooling", "drying", "fan"]), st = {
   off: { icon: "mdi:power", color: "#94a3b8" },
   heat: { icon: "mdi:fire", color: "#f97316" },
   cool: { icon: "mdi:snowflake", color: "#1d4ed8" },
