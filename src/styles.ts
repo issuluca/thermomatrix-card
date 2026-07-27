@@ -288,7 +288,7 @@ export const thermoMatrixStyles = css`
     width: 100%;
     flex-direction: column;
     transform: translateY(var(--wheel-offset));
-    animation: wheel-roll 680ms cubic-bezier(0.2, 0.72, 0.22, 1)
+    animation: wheel-roll 2s cubic-bezier(0.16, 0.72, 0.22, 1)
       var(--wheel-delay) both;
     will-change: transform;
   }
@@ -300,14 +300,17 @@ export const thermoMatrixStyles = css`
     flex: 0 0 14px;
     align-items: center;
     justify-content: center;
-    font: 800 9px/14px "Arial Narrow", Arial, sans-serif;
     font-style: normal;
     opacity: 0.28;
-    text-shadow: 0 1px 0 color-mix(in srgb, currentColor 18%, transparent);
   }
 
   .wheel-strip i.selected {
     opacity: 1;
+  }
+
+  .wheel-strip .matrix-char {
+    --matrix-pixel-size: 1.25px;
+    --matrix-pixel-gap: 0.4px;
   }
 
   @keyframes wheel-roll {
