@@ -69,9 +69,11 @@ etichetta accessibile.
 
 ### Indicatore di stato meccanico
 
-Senza un `status_entity` dedicato, lo stato `ON`, `IDLE` oppure `OFF` viene
-mostrato su quattro rotelle alfabetiche animate. Le lettere adiacenti rimangono
-parzialmente visibili per simulare un contatore elettromeccanico.
+Senza un `status_entity` dedicato, lo stato viene mostrato su quattro rotelle
+alfabetiche animate con caratteri LCD a matrice: `--ON`, `-OFF` oppure `IDLE`.
+Le lettere adiacenti rimangono parzialmente visibili e la rotazione dura circa
+due secondi, per simulare il movimento leggibile di un contatore
+elettromeccanico.
 
 Quando è configurato `status_entity`, la riga di stato estesa sostituisce le
 rotelle e il nuovo valore entra dal basso con una breve rotazione verticale.
