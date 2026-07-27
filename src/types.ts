@@ -20,6 +20,7 @@ export interface HomeAssistant {
 }
 
 export type BorderMode = "state" | "neutral";
+export type ButtonLabelMode = "auto" | "show" | "hide";
 
 export interface ThermoMatrixConfig {
   type: string;
@@ -31,6 +32,8 @@ export interface ThermoMatrixConfig {
   status_entity?: string;
   language?: "auto" | "en" | "it" | "es" | "fr" | "de" | "pt";
   border_mode?: BorderMode;
+  hvac_button_labels?: ButtonLabelMode;
+  preset_button_labels?: ButtonLabelMode;
   temperature_step?: number;
 }
 
