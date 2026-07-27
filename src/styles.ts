@@ -288,12 +288,12 @@ export const thermoMatrixStyles = css`
     width: 100%;
     flex-direction: column;
     transform: translateY(var(--wheel-offset));
-    animation: wheel-roll 2s cubic-bezier(0.16, 0.72, 0.22, 1)
+    animation: wheel-roll 5s cubic-bezier(0.16, 0.72, 0.22, 1)
       var(--wheel-delay) both;
     will-change: transform;
   }
 
-  .wheel-strip i {
+  .wheel-strip > i {
     display: flex;
     width: 100%;
     height: 14px;
@@ -304,7 +304,7 @@ export const thermoMatrixStyles = css`
     opacity: 0.28;
   }
 
-  .wheel-strip i.selected {
+  .wheel-strip > i.selected {
     opacity: 1;
   }
 
@@ -319,6 +319,48 @@ export const thermoMatrixStyles = css`
     }
     to {
       transform: translateY(var(--wheel-offset));
+    }
+  }
+
+  .status-stack {
+    position: relative;
+    left: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .status-box {
+    width: 50px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    box-sizing: border-box;
+    opacity: 0.24;
+  }
+
+  .status-box.active {
+    background: color-mix(in srgb, currentColor 13%, transparent);
+    box-shadow: inset 0 0 0 1px currentColor,
+      0 0 8px color-mix(in srgb, currentColor 42%, transparent);
+    opacity: 1;
+  }
+
+  .status-box.active.blink .matrix-word {
+    animation: status-text-blink 1.15s ease-in-out infinite;
+  }
+
+  @keyframes status-text-blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.22;
     }
   }
 
@@ -503,7 +545,8 @@ export const thermoMatrixStyles = css`
 
   @media (prefers-reduced-motion: reduce) {
     .wheel-strip,
-    .external-status-slide {
+    .external-status-slide,
+    .status-box.active.blink .matrix-word {
       animation: none;
     }
   }
