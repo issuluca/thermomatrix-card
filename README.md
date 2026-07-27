@@ -45,6 +45,7 @@ temperature_step: 0.1
 language: auto
 hvac_button_labels: auto
 preset_button_labels: auto
+status_display: wheel
 ```
 
 ### Etichette responsive dei pulsanti
@@ -72,8 +73,17 @@ etichetta accessibile.
 Senza un `status_entity` dedicato, lo stato viene mostrato su quattro rotelle
 alfabetiche animate con caratteri LCD a matrice: `--ON`, `-OFF` oppure `IDLE`.
 Le lettere adiacenti rimangono parzialmente visibili e la rotazione dura circa
-due secondi, per simulare il movimento leggibile di un contatore
+cinque secondi, per simulare il movimento leggibile di un contatore
 elettromeccanico.
+
+È possibile ripristinare i tre indicatori LCD originali:
+
+```yaml
+status_display: indicators
+```
+
+I valori disponibili sono `wheel` e `indicators`; il valore predefinito è
+`wheel`.
 
 Quando è configurato `status_entity`, la riga di stato estesa sostituisce le
 rotelle e il nuovo valore entra dal basso con una breve rotazione verticale.
