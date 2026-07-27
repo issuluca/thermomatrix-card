@@ -13,9 +13,9 @@ import type {
   ThermoMatrixConfig,
 } from "./types";
 
-const VERSION = "0.4.0";
+const VERSION = "0.4.1";
 const WORKING_ACTIONS = new Set(["heating", "cooling", "drying", "fan"]);
-const WHEEL_CHARACTERS = [" ", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
+const WHEEL_CHARACTERS = ["-", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
 
 const MODE_META: Record<string, { icon: string; color: string }> = {
     off: { icon: "mdi:power", color: "#94a3b8" },
@@ -68,6 +68,7 @@ const LETTERS: Record<string, string[]> = {
   W: ["10001", "10001", "10001", "10101", "10101", "10101", "01010"],
   X: ["10001", "10001", "01010", "00100", "01010", "10001", "10001"],
   Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
+  "-": ["00000", "00000", "00000", "11111", "00000", "00000", "00000"],
 };
 
 const PRESET_META: Record<string, { icon: string; color: string }> = {
@@ -461,8 +462,8 @@ export class ThermoMatrixCard extends LitElement {
     const padded = status === "IDLE"
       ? status
       : status === "OFF"
-        ? "OFF "
-        : " ON ";
+        ? "-OFF"
+        : "--ON";
 
     return html`
       <div class="status-wheel" role="status" aria-label=${status}>
@@ -489,7 +490,7 @@ export class ThermoMatrixCard extends LitElement {
           ${WHEEL_CHARACTERS.map(
             (wheelCharacter) =>
               html`<i class=${wheelCharacter === character ? "selected" : ""}>
-                ${wheelCharacter === " " ? "\u00a0" : wheelCharacter}
+                ${this._renderMatrixChar(wheelCharacter)}
               </i>`,
           )}
         </span>
