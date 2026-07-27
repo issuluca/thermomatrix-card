@@ -13,7 +13,7 @@ import type {
   ThermoMatrixConfig,
 } from "./types";
 
-const VERSION = "0.4.1";
+const VERSION = "0.4.2";
 const WORKING_ACTIONS = new Set(["heating", "cooling", "drying", "fan"]);
 const WHEEL_CHARACTERS = ["-", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
 
@@ -183,6 +183,18 @@ export class ThermoMatrixCard extends LitElement {
           },
         },
         {
+          name: "status_display",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                { value: "wheel", label: "Alphabet wheel" },
+                { value: "indicators", label: "ON / IDLE / OFF indicators" },
+              ],
+            },
+          },
+        },
+        {
           name: "temperature_step",
           selector: {
             number: { min: 0.1, max: 5, step: 0.1, mode: "box" },
@@ -201,6 +213,7 @@ export class ThermoMatrixCard extends LitElement {
           border_mode: "Card border",
           hvac_button_labels: "HVAC button labels",
           preset_button_labels: "Preset button labels",
+          status_display: "Status display",
           temperature_step: "Temperature step",
         })[schema.name ?? ""] ?? schema.name,
       computeHelper: (schema: { name?: string }) =>
@@ -231,6 +244,7 @@ export class ThermoMatrixCard extends LitElement {
       language: "auto",
       hvac_button_labels: "auto",
       preset_button_labels: "auto",
+      status_display: "wheel",
     };
   }
 
@@ -250,6 +264,7 @@ export class ThermoMatrixCard extends LitElement {
       language: config.language ?? "auto",
       hvac_button_labels: config.hvac_button_labels ?? "auto",
       preset_button_labels: config.preset_button_labels ?? "auto",
+      status_display: config.status_display ?? "wheel",
     };
   }
 
@@ -363,6 +378,9 @@ export class ThermoMatrixCard extends LitElement {
         : WORKING_ACTIONS.has(action)
           ? "ON"
           : "ON";
+    const isOn = status === "ON";
+    const isIdle = status === "IDLE";
+    const isOff = status === "OFF";
     const externalStatus = this._config.status_entity
       ? this.hass.states[this._config.status_entity]
       : undefined;
@@ -397,9 +415,15 @@ export class ThermoMatrixCard extends LitElement {
             ${this._renderTemperature(climate.attributes.current_temperature)}
           </div>
           ${!this._config.status_entity
-            ? html`
-                ${this._renderStatusWheel(status)}
-              `
+            ? this._config.status_display === "indicators"
+              ? html`
+                  <div class="status-stack">
+                    ${this._renderStatusIndicator("ON", isOn, true)}
+                    ${this._renderStatusIndicator("IDLE", isIdle, true)}
+                    ${this._renderStatusIndicator("OFF", isOff, false)}
+                  </div>
+                `
+              : html`${this._renderStatusWheel(status)}`
             : nothing}
           <div class="lcd-reading target">
             <span class="lcd-reading-label">${this._t("target")}</span>
@@ -474,6 +498,22 @@ export class ThermoMatrixCard extends LitElement {
           ),
         )}
       </div>
+    `;
+  }
+
+  private _renderStatusIndicator(
+    label: string,
+    active: boolean,
+    blink: boolean,
+  ): TemplateResult {
+    return html`
+      <span class="status-box ${active ? "active" : ""} ${active && blink
+        ? "blink"
+        : ""}">
+        <span class="matrix-word">
+          ${[...label].map((character) => this._renderMatrixChar(character))}
+        </span>
+      </span>
     `;
   }
 
