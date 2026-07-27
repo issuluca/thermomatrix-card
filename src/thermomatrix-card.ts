@@ -1,4 +1,11 @@
-import { html, LitElement, nothing, type TemplateResult } from "lit";
+import {
+  html,
+  LitElement,
+  nothing,
+  type PropertyValues,
+  type TemplateResult,
+} from "lit";
+import { keyed } from "lit/directives/keyed.js";
 import { thermoMatrixStyles } from "./styles";
 import type {
   HassEntity,
@@ -6,8 +13,9 @@ import type {
   ThermoMatrixConfig,
 } from "./types";
 
-const VERSION = "0.3.1";
+const VERSION = "0.4.0";
 const WORKING_ACTIONS = new Set(["heating", "cooling", "drying", "fan"]);
+const WHEEL_CHARACTERS = [" ", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
 
 const MODE_META: Record<string, { icon: string; color: string }> = {
     off: { icon: "mdi:power", color: "#94a3b8" },
@@ -96,6 +104,8 @@ export class ThermoMatrixCard extends LitElement {
 
   public hass!: HomeAssistant;
   private _config!: ThermoMatrixConfig;
+  private _labelResizeObserver?: ResizeObserver;
+  private _labelSyncFrame?: number;
 
   public static getConfigForm(): Record<string, unknown> {
     return {
@@ -146,6 +156,32 @@ export class ThermoMatrixCard extends LitElement {
           },
         },
         {
+          name: "hvac_button_labels",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                { value: "auto", label: "Automatic" },
+                { value: "show", label: "Always show" },
+                { value: "hide", label: "Icons only" },
+              ],
+            },
+          },
+        },
+        {
+          name: "preset_button_labels",
+          selector: {
+            select: {
+              mode: "dropdown",
+              options: [
+                { value: "auto", label: "Automatic" },
+                { value: "show", label: "Always show" },
+                { value: "hide", label: "Icons only" },
+              ],
+            },
+          },
+        },
+        {
           name: "temperature_step",
           selector: {
             number: { min: 0.1, max: 5, step: 0.1, mode: "box" },
@@ -162,6 +198,8 @@ export class ThermoMatrixCard extends LitElement {
           status_entity: "Advanced status sensor",
           language: "Language",
           border_mode: "Card border",
+          hvac_button_labels: "HVAC button labels",
+          preset_button_labels: "Preset button labels",
           temperature_step: "Temperature step",
         })[schema.name ?? ""] ?? schema.name,
       computeHelper: (schema: { name?: string }) =>
@@ -190,6 +228,8 @@ export class ThermoMatrixCard extends LitElement {
       show_consumption: false,
       border_mode: "state",
       language: "auto",
+      hvac_button_labels: "auto",
+      preset_button_labels: "auto",
     };
   }
 
@@ -207,7 +247,29 @@ export class ThermoMatrixCard extends LitElement {
       show_consumption: config.show_consumption ?? false,
       border_mode: config.border_mode ?? "state",
       language: config.language ?? "auto",
+      hvac_button_labels: config.hvac_button_labels ?? "auto",
+      preset_button_labels: config.preset_button_labels ?? "auto",
     };
+  }
+
+  protected firstUpdated(): void {
+    this._labelResizeObserver = new ResizeObserver(() =>
+      this._scheduleLabelSync(),
+    );
+    this._labelResizeObserver.observe(this);
+    this._scheduleLabelSync();
+  }
+
+  protected updated(_changedProperties: PropertyValues): void {
+    this._scheduleLabelSync();
+  }
+
+  public disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._labelResizeObserver?.disconnect();
+    if (this._labelSyncFrame !== undefined) {
+      cancelAnimationFrame(this._labelSyncFrame);
+    }
   }
 
   public getCardSize(): number {
@@ -263,7 +325,8 @@ export class ThermoMatrixCard extends LitElement {
 
     return html`
       <div
-        class="button-grid"
+        class="button-grid button-grid-modes label-${this._config
+          .hvac_button_labels ?? "auto"}"
         style=${`--columns:${Math.min(visibleModes.length, 5)}`}
       >
         ${visibleModes.map((mode) => {
@@ -277,10 +340,11 @@ export class ThermoMatrixCard extends LitElement {
               class="mode-button ${climate.state === mode ? "active" : ""}"
               style=${`--button-color:${meta.color}`}
               title=${label}
+              aria-label=${label}
               @click=${() => this._setHvacMode(mode)}
             >
               <ha-icon class="mode-icon" icon=${meta.icon}></ha-icon>
-              ${label}
+              <span class="button-label">${label}</span>
             </button>
           `;
         })}
@@ -291,9 +355,13 @@ export class ThermoMatrixCard extends LitElement {
   private _renderDisplay(climate: HassEntity): TemplateResult {
     const mode = climate.state;
     const action = String(climate.attributes.hvac_action ?? "");
-    const isOn = WORKING_ACTIONS.has(action);
-    const isIdle = mode !== "off" && action === "idle";
-    const isOff = mode === "off";
+    const status = mode === "off"
+      ? "OFF"
+      : action === "idle"
+        ? "IDLE"
+        : WORKING_ACTIONS.has(action)
+          ? "ON"
+          : "ON";
     const externalStatus = this._config.status_entity
       ? this.hass.states[this._config.status_entity]
       : undefined;
@@ -329,11 +397,7 @@ export class ThermoMatrixCard extends LitElement {
           </div>
           ${!this._config.status_entity
             ? html`
-                <div class="status-stack">
-                  ${this._renderStatus("ON", isOn, true)}
-                  ${this._renderStatus("IDLE", isIdle, true)}
-                  ${this._renderStatus("OFF", isOff, false)}
-                </div>
+                ${this._renderStatusWheel(status)}
               `
             : nothing}
           <div class="lcd-reading target">
@@ -349,7 +413,7 @@ export class ThermoMatrixCard extends LitElement {
                   ? this._humanize(externalStatus.state)
                   : this._t("unavailable")}
               >
-                ${this._renderMatrixWord(
+                ${this._renderExternalStatus(
                   externalStatus
                     ? this._humanize(externalStatus.state).toUpperCase()
                     : this._t("unavailable").toUpperCase(),
@@ -393,20 +457,53 @@ export class ThermoMatrixCard extends LitElement {
     `;
   }
 
-  private _renderStatus(
-    label: string,
-    active: boolean,
-    blink: boolean,
-  ): TemplateResult {
+  private _renderStatusWheel(status: string): TemplateResult {
+    const padded = status === "IDLE"
+      ? status
+      : status === "OFF"
+        ? "OFF "
+        : " ON ";
+
     return html`
-      <span class="status-box ${active ? "active" : ""} ${active && blink
-        ? "blink"
-        : ""}">
-        <span class="matrix-word">
-          ${[...label].map((character) => this._renderMatrixChar(character))}
+      <div class="status-wheel" role="status" aria-label=${status}>
+        ${[...padded].map((character, index) =>
+          keyed(
+            `${status}-${index}`,
+            this._renderWheelReel(character, index),
+          ),
+        )}
+      </div>
+    `;
+  }
+
+  private _renderWheelReel(character: string, index: number): TemplateResult {
+    const wheelIndex = Math.max(0, WHEEL_CHARACTERS.indexOf(character));
+    return html`
+      <span class="wheel-window" aria-hidden="true">
+        <span
+          class="wheel-strip"
+          style=${`--wheel-offset:${6 - wheelIndex * 14}px;--wheel-delay:${
+            index * 55
+          }ms`}
+        >
+          ${WHEEL_CHARACTERS.map(
+            (wheelCharacter) =>
+              html`<i class=${wheelCharacter === character ? "selected" : ""}>
+                ${wheelCharacter === " " ? "\u00a0" : wheelCharacter}
+              </i>`,
+          )}
         </span>
       </span>
     `;
+  }
+
+  private _renderExternalStatus(value: string): unknown {
+    return keyed(
+      value,
+      html`<span class="external-status-slide">
+        ${this._renderMatrixWord(value)}
+      </span>`,
+    );
   }
 
   private _renderMatrixChar(value: string): TemplateResult {
@@ -447,7 +544,8 @@ export class ThermoMatrixCard extends LitElement {
     const activePreset = String(climate.attributes.preset_mode ?? "");
     return html`
       <div
-        class="button-grid"
+        class="button-grid button-grid-presets label-${this._config
+          .preset_button_labels ?? "auto"}"
         style=${`--columns:${Math.min(presets.length, 5)}`}
       >
         ${presets.map((preset) => {
@@ -460,10 +558,12 @@ export class ThermoMatrixCard extends LitElement {
             <button
               class=${activePreset === preset ? "active" : ""}
               style=${`--button-color:${meta.color}`}
+              title=${label}
+              aria-label=${label}
               @click=${() => this._setPreset(preset)}
             >
               <ha-icon class="preset-icon" icon=${meta.icon}></ha-icon>
-              <span>${label}</span>
+              <span class="button-label">${label}</span>
             </button>
           `;
         })}
@@ -605,6 +705,33 @@ export class ThermoMatrixCard extends LitElement {
     return value in TRANSLATIONS.en
       ? this._t(value as TranslationKey)
       : this._humanize(value);
+  }
+
+  private _scheduleLabelSync(): void {
+    if (this._labelSyncFrame !== undefined) {
+      cancelAnimationFrame(this._labelSyncFrame);
+    }
+    this._labelSyncFrame = requestAnimationFrame(() => {
+      this._labelSyncFrame = undefined;
+      this._syncAutoLabels();
+    });
+  }
+
+  private _syncAutoLabels(): void {
+    this.renderRoot
+      .querySelectorAll<HTMLElement>(".button-grid.label-auto")
+      .forEach((grid) => {
+        const buttons = [...grid.querySelectorAll<HTMLButtonElement>("button")];
+        const compact = buttons.some((button) => {
+          const label = button.querySelector<HTMLElement>(".button-label");
+          if (!label) {
+            return false;
+          }
+          const availableWidth = button.getBoundingClientRect().width - 20;
+          return label.scrollWidth > availableWidth;
+        });
+        grid.classList.toggle("labels-compact", compact);
+      });
   }
 }
 
