@@ -5,6 +5,16 @@ Home Assistant.
 
 ![ThermoMatrix Card preview](assets/preview.svg)
 
+## Aspetto reale
+
+| Italiano · tema chiaro | Italiano · tema scuro |
+| --- | --- |
+| <img src="assets/screenshots/italian-light.png" alt="ThermoMatrix Card in italiano con tema chiaro" width="420"> | <img src="assets/screenshots/italian-dark.png" alt="ThermoMatrix Card in italiano con tema scuro" width="420"> |
+
+| English · light theme | English · dark theme |
+| --- | --- |
+| <img src="assets/screenshots/english-light.png" alt="ThermoMatrix Card in English with light theme" width="420"> | <img src="assets/screenshots/english-dark.png" alt="ThermoMatrix Card in English with dark theme" width="420"> |
+
 > Stato del progetto: versione di sviluppo installabile come archivio
 > personalizzato HACS.
 
@@ -33,7 +43,40 @@ show_consumption: false
 border_mode: state
 temperature_step: 0.1
 language: auto
+hvac_button_labels: auto
+preset_button_labels: auto
 ```
+
+### Etichette responsive dei pulsanti
+
+Le etichette delle modalità HVAC e dei preset sono configurabili
+indipendentemente:
+
+```yaml
+hvac_button_labels: auto
+preset_button_labels: auto
+```
+
+I valori disponibili sono:
+
+- `auto` — mostra icona e testo quando entrano correttamente nel pulsante,
+  altrimenti mantiene soltanto l'icona;
+- `show` — mostra sempre icona e testo;
+- `hide` — mostra soltanto l'icona.
+
+In tutte le modalità il nome completo rimane disponibile come tooltip e come
+etichetta accessibile.
+
+### Indicatore di stato meccanico
+
+Senza un `status_entity` dedicato, lo stato `ON`, `IDLE` oppure `OFF` viene
+mostrato su quattro rotelle alfabetiche animate. Le lettere adiacenti rimangono
+parzialmente visibili per simulare un contatore elettromeccanico.
+
+Quando è configurato `status_entity`, la riga di stato estesa sostituisce le
+rotelle e il nuovo valore entra dal basso con una breve rotazione verticale.
+L'animazione parte soltanto quando cambia il valore ed è disabilitata se il
+sistema richiede la riduzione dei movimenti.
 
 ## Lingue
 
