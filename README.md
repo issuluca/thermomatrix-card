@@ -7,13 +7,7 @@ Home Assistant.
 
 ## Aspetto reale
 
-| Italiano · tema chiaro | Italiano · tema scuro |
-| --- | --- |
-| <img src="assets/screenshots/italian-light.png" alt="ThermoMatrix Card in italiano con tema chiaro" width="420"> | <img src="assets/screenshots/italian-dark.png" alt="ThermoMatrix Card in italiano con tema scuro" width="420"> |
-
-| English · light theme | English · dark theme |
-| --- | --- |
-| <img src="assets/screenshots/english-light.png" alt="ThermoMatrix Card in English with light theme" width="420"> | <img src="assets/screenshots/english-dark.png" alt="ThermoMatrix Card in English with dark theme" width="420"> |
+![ThermoMatrix Card in Home Assistant con temi chiari e scuri](assets/thermomatrix-gallery.png)
 
 > Stato del progetto: versione di sviluppo installabile come archivio
 > personalizzato HACS.
