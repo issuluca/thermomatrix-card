@@ -36,6 +36,7 @@ export const thermoMatrixStyles = css`
   }
 
   button {
+    position: relative;
     min-width: 0;
     min-height: 50px;
     padding: 7px 8px;
@@ -72,6 +73,23 @@ export const thermoMatrixStyles = css`
     margin-bottom: 3px;
     font-size: 20px;
     line-height: 1;
+  }
+
+  .label-hide .button-label,
+  .label-auto.labels-compact .button-label {
+    position: absolute;
+    width: max-content;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .label-hide .mode-icon,
+  .label-auto.labels-compact .mode-icon,
+  .label-hide .preset-icon,
+  .label-auto.labels-compact .preset-icon {
+    margin-bottom: 0;
   }
 
   .lcd-panel {
@@ -227,13 +245,78 @@ export const thermoMatrixStyles = css`
     box-sizing: border-box;
   }
 
-  .status-stack {
+  .status-wheel {
     position: relative;
     left: 4px;
+    display: grid;
+    grid-template-columns: repeat(4, 11px);
+    gap: 2px;
+    width: 54px;
+    height: 30px;
+    padding: 1px 2px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, currentColor 58%, transparent);
+    border-radius: 4px;
+    box-sizing: border-box;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.18),
+      0 0 7px color-mix(in srgb, currentColor 24%, transparent);
+  }
+
+  .wheel-window {
+    position: relative;
+    height: 26px;
+    overflow: hidden;
+    border-right: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      black 28%,
+      black 72%,
+      transparent 100%
+    );
+  }
+
+  .wheel-window:last-child {
+    border-right: 0;
+  }
+
+  .wheel-strip {
+    position: absolute;
+    inset: 0 auto auto 0;
     display: flex;
+    width: 100%;
     flex-direction: column;
+    transform: translateY(var(--wheel-offset));
+    animation: wheel-roll 680ms cubic-bezier(0.2, 0.72, 0.22, 1)
+      var(--wheel-delay) both;
+    will-change: transform;
+  }
+
+  .wheel-strip i {
+    display: flex;
+    width: 100%;
+    height: 14px;
+    flex: 0 0 14px;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    font: 800 9px/14px "Arial Narrow", Arial, sans-serif;
+    font-style: normal;
+    opacity: 0.28;
+    text-shadow: 0 1px 0 color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  .wheel-strip i.selected {
+    opacity: 1;
+  }
+
+  @keyframes wheel-roll {
+    from {
+      transform: translateY(6px);
+    }
+    to {
+      transform: translateY(var(--wheel-offset));
+    }
   }
 
   .lcd-external-status {
@@ -258,36 +341,21 @@ export const thermoMatrixStyles = css`
     --matrix-pixel-gap: 0.42px;
   }
 
-  .status-box {
-    width: 50px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid currentColor;
-    border-radius: 3px;
-    box-sizing: border-box;
-    opacity: 0.24;
+  .external-status-slide {
+    display: inline-flex;
+    max-width: 100%;
+    animation: external-status-roll 560ms cubic-bezier(0.2, 0.72, 0.22, 1)
+      both;
   }
 
-  .status-box.active {
-    background: color-mix(in srgb, currentColor 13%, transparent);
-    box-shadow: inset 0 0 0 1px currentColor,
-      0 0 8px color-mix(in srgb, currentColor 42%, transparent);
-    opacity: 1;
-  }
-
-  .status-box.active.blink .matrix-word {
-    animation: status-text-blink 1.15s ease-in-out infinite;
-  }
-
-  @keyframes status-text-blink {
-    0%,
-    100% {
-      opacity: 1;
+  @keyframes external-status-roll {
+    from {
+      opacity: 0;
+      transform: perspective(80px) translateY(18px) rotateX(-42deg);
     }
-    50% {
-      opacity: 0.22;
+    to {
+      opacity: 1;
+      transform: perspective(80px) translateY(0) rotateX(0);
     }
   }
 
@@ -428,5 +496,12 @@ export const thermoMatrixStyles = css`
     padding: 16px;
     color: var(--error-color, #db4437);
     text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wheel-strip,
+    .external-status-slide {
+      animation: none;
+    }
   }
 `;
