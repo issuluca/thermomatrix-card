@@ -1,4 +1,4 @@
-![ThermoMatrix Card in Home Assistant](assets/thermomatrix-gallery.png)
+![ThermoMatrix Card](assets/thermomatrix-banner.png)
 
 <div align="center">
 
@@ -55,6 +55,14 @@ The card is built for daily use first, then shared so other Home Assistant users
 - 🌍 Automatic Home Assistant language detection.
 - 🖱️ Visual configuration editor.
 - ♿ Accessible labels, tooltips and reduced-motion support.
+
+---
+
+## Interface
+
+The gallery below shows the current card in real Home Assistant dashboards with light and dark themes.
+
+![ThermoMatrix Card in Home Assistant](assets/thermomatrix-gallery.png)
 
 ---
 
@@ -250,6 +258,12 @@ Released under the [MIT License](LICENSE).
 
 <div align="center">
 
-This project is part of the **[iSSU Open Homelab ecosystem](https://github.com/issu-lab/Open-Homelab)**.
+This project is part of the **iSSU Open Homelab ecosystem**.
+
+<a href="https://github.com/issu-lab/Open-Homelab">
+  <img src="assets/issu-open-homelab-badge.png"
+       alt="Explore iSSU Open Homelab"
+       width="480">
+</a>
 
 </div>
