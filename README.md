@@ -1,37 +1,111 @@
-# ThermoMatrix Card
+![ThermoMatrix Card in Home Assistant](assets/thermomatrix-gallery.png)
 
-Una card Lovelace modulare in stile LCD per controllare entità `climate` in
-Home Assistant.
+<div align="center">
 
-![ThermoMatrix Card preview](assets/preview.svg)
+[![Status](https://img.shields.io/badge/status-active%20development-F0B429?style=flat-square)](#project-status)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-dashboard-41BDF5?style=flat-square&logo=homeassistant&logoColor=white)](https://www.home-assistant.io/)
+[![HACS](https://img.shields.io/badge/HACS-custom%20repository-C346F4?style=flat-square)](https://www.hacs.xyz/)
+[![License](https://img.shields.io/badge/license-MIT-C346F4?style=flat-square)](LICENSE)
 
-## Aspetto reale
+**An LCD-inspired climate card for Home Assistant.**
 
-![ThermoMatrix Card in Home Assistant con temi chiari e scuri](assets/thermomatrix-gallery.png)
+ThermoMatrix provides a clear climate control interface with seven-segment temperatures, automatic HVAC controls, presets and optional power monitoring.
 
-> Stato del progetto: versione di sviluppo installabile come archivio
-> personalizzato HACS.
+</div>
 
-## Funzioni già previste
+---
 
-- modalità HVAC generate automaticamente da `hvac_modes`;
-- temperatura ambiente e target con display a sette segmenti;
-- indicatori LCD `ON`, `IDLE` e `OFF`;
-- regolazione della temperatura;
-- preset generati automaticamente e disattivabili;
-- modulo opzionale per un sensore di consumo, con valore a sette segmenti;
-- stato operativo avanzato opzionale all'interno del display LCD;
-- bordo dinamico secondo la modalità o neutro;
-- adattamento al tema chiaro e scuro;
-- lingua rilevata automaticamente da Home Assistant, con possibilità di
-  selezione manuale;
-- configurazione dall'editor visuale di Home Assistant.
+## Project Status
 
-## Configurazione di sviluppo
+| Field | Current state |
+|---|---|
+| **Maturity** | 🟡 Active Development |
+| **Used in my homelab** | ✅ Yes |
+| **Recommended for production** | ❌ Not yet |
+| **Setup difficulty** | 🟢 Beginner |
+| **Documentation** | 🟡 In progress |
+
+> [!NOTE]
+> **Beginner setup:** installation is handled by HACS. After adding the custom repository, select a climate entity in the visual card editor.
+
+> [!WARNING]
+> ThermoMatrix is under active development. Options and visual details may change between versions.
+
+---
+
+## Why It Exists
+
+ThermoMatrix was created for my own Home Assistant dashboards. I wanted a climate card that was compact, easy to read and visually different from standard controls.
+
+The card is built for daily use first, then shared so other Home Assistant users can install and adapt it.
+
+---
+
+## Features
+
+- 🌡️ Seven-segment room and target temperatures.
+- 🔄 HVAC buttons generated automatically from the entity's `hvac_modes`.
+- 🎛️ Automatic preset controls that can be disabled.
+- 🟢 LCD-style `ON`, `IDLE` and `OFF` indicators.
+- 🎞️ Optional mechanical wheel status display.
+- ⚡ Optional power-consumption module.
+- 📋 Optional extended status from a separate entity.
+- 🎨 Dynamic or neutral borders.
+- 🌓 Automatic light and dark theme support.
+- 🌍 Automatic Home Assistant language detection.
+- 🖱️ Visual configuration editor.
+- ♿ Accessible labels, tooltips and reduced-motion support.
+
+---
+
+## Installation with HACS
+
+ThermoMatrix is installed as a HACS custom repository. Manual copying of the JavaScript file is not required.
+
+1. Open **HACS** in Home Assistant.
+2. Open the menu in the top-right corner.
+3. Select **Custom repositories**.
+4. Add this repository URL:
+
+```text
+https://github.com/issu-lab/thermomatrix-card
+```
+
+5. Select **Dashboard** as the repository type. Depending on the interface language or HACS version, it may appear as **Plancia** or use the older name **Plugin**.
+6. Select **Add**.
+7. Search for **ThermoMatrix Card** in HACS.
+8. Open it and select **Download**.
+9. Refresh the Home Assistant browser page after installation.
+
+HACS manages the dashboard resource automatically.
+
+> [!TIP]
+> The general procedure is also described in the [HACS custom repository documentation](https://www.hacs.xyz/docs/faq/custom_repositories/).
+
+---
+
+## Add the Card
+
+1. Open a Home Assistant dashboard.
+2. Enter dashboard edit mode.
+3. Select **Add card**.
+4. Search for **ThermoMatrix Card**.
+5. Select the climate entity and configure the available options in the visual editor.
+
+A minimal YAML configuration is also available:
 
 ```yaml
 type: custom:thermomatrix-card
-entity: climate.termostato_sala
+entity: climate.living_room
+```
+
+---
+
+## Configuration Example
+
+```yaml
+type: custom:thermomatrix-card
+entity: climate.living_room
 show_presets: true
 show_consumption: false
 border_mode: state
@@ -42,119 +116,140 @@ preset_button_labels: auto
 status_display: wheel
 ```
 
-### Etichette responsive dei pulsanti
+### Main options
 
-Le etichette delle modalità HVAC e dei preset sono configurabili
-indipendentemente:
+| Option | Purpose |
+|---|---|
+| `entity` | Climate entity controlled by the card. |
+| `show_presets` | Shows presets reported by the climate entity. |
+| `show_consumption` | Enables the optional power module. |
+| `power_entity` | Sensor used by the power module. |
+| `status_entity` | Optional entity used for extended operating states. |
+| `border_mode` | Uses a state-based or neutral border. |
+| `temperature_step` | Temperature adjustment step. |
+| `language` | Uses automatic or manually selected translations. |
+| `hvac_button_labels` | Controls HVAC button text visibility. |
+| `preset_button_labels` | Controls preset button text visibility. |
+| `status_display` | Selects the mechanical wheel or LCD indicators. |
+
+---
+
+## Responsive Button Labels
+
+HVAC and preset labels can be configured independently:
 
 ```yaml
 hvac_button_labels: auto
 preset_button_labels: auto
 ```
 
-I valori disponibili sono:
+Available values:
 
-- `auto` — mostra icona e testo quando entrano correttamente nel pulsante,
-  altrimenti mantiene soltanto l'icona;
-- `show` — mostra sempre icona e testo;
-- `hide` — mostra soltanto l'icona.
+- `auto` — shows the icon and text when they fit, otherwise keeps only the icon.
+- `show` — always shows both icon and text.
+- `hide` — shows only the icon.
 
-In tutte le modalità il nome completo rimane disponibile come tooltip e come
-etichetta accessibile.
+The complete name remains available as a tooltip and accessible label.
 
-### Indicatore di stato meccanico
+---
 
-Senza un `status_entity` dedicato, lo stato viene mostrato su quattro rotelle
-alfabetiche animate con caratteri LCD a matrice: `--ON`, `-OFF` oppure `IDLE`.
-Le lettere adiacenti rimangono parzialmente visibili e la rotazione dura circa
-cinque secondi, per simulare il movimento leggibile di un contatore
-elettromeccanico.
+## Status Display
 
-È possibile ripristinare i tre indicatori LCD originali:
+The default `wheel` display uses four animated LCD character wheels to show `--ON`, `-OFF` or `IDLE`.
+
+To use the original LCD indicators instead:
 
 ```yaml
 status_display: indicators
 ```
 
-I valori disponibili sono `wheel` e `indicators`; il valore predefinito è
-`wheel`.
+Available values are `wheel` and `indicators`.
 
-Quando è configurato `status_entity`, la riga di stato estesa sostituisce le
-rotelle e il nuovo valore entra dal basso con una breve rotazione verticale.
-L'animazione parte soltanto quando cambia il valore ed è disabilitata se il
-sistema richiede la riduzione dei movimenti.
-
-## Lingue
-
-Il valore predefinito `language: auto` usa la lingua del profilo Home
-Assistant. Se la lingua non è ancora supportata, la card utilizza l'inglese.
-
-Le traduzioni incluse sono inglese, italiano, spagnolo, francese, tedesco e
-portoghese. È anche possibile forzare una lingua:
-
-```yaml
-language: es
-```
-
-I valori ammessi sono `auto`, `en`, `it`, `es`, `fr`, `de` e `pt`.
-
-Con il modulo consumo:
+If `status_entity` is configured, its value replaces the standard status display with a full-width status line. The animation runs only when the value changes and is disabled when reduced motion is requested.
 
 ```yaml
 type: custom:thermomatrix-card
-entity: climate.termostato_sala
-show_presets: true
+entity: climate.living_room
+status_entity: sensor.climate_status
+```
+
+---
+
+## Power Monitoring
+
+Enable the optional consumption module with a compatible power sensor:
+
+```yaml
+type: custom:thermomatrix-card
+entity: climate.living_room
 show_consumption: true
-power_entity: sensor.climatizzatore_power
+power_entity: sensor.climate_power
 border_mode: state
 ```
 
-### Stato operativo avanzato
+---
 
-È possibile indicare un'entità separata tramite `status_entity` per mostrare
-stati specifici, ad esempio `In attivazione` o `In spegnimento`, ricavati da
-un'automazione o dal sensore di consumo. Il testo viene mostrato su una riga a
-tutta larghezza sotto le temperature, dentro il display LCD, e sostituisce gli
-indicatori `ON`, `IDLE` e `OFF`:
+## Languages
+
+The default value is:
 
 ```yaml
-type: custom:thermomatrix-card
-entity: climate.termostato_sala
-status_entity: sensor.stato_climatizzatore
-show_consumption: true
-power_entity: sensor.climatizzatore_power
+language: auto
 ```
 
-`status_entity` è una funzione opzionale pensata per impianti che espongono
-fasi operative aggiuntive. Se non viene configurata, la card mantiene i normali
-indicatori `ON`, `IDLE` e `OFF` e non aggiunge altri riquadri.
+ThermoMatrix follows the Home Assistant profile language and falls back to English when the selected language is unavailable.
 
-## Sviluppo
+Included translations:
+
+- English
+- Italian
+- Spanish
+- French
+- German
+- Portuguese
+
+A language can also be selected manually:
+
+```yaml
+language: it
+```
+
+Supported values are `auto`, `en`, `it`, `es`, `fr`, `de` and `pt`.
+
+---
+
+## Development
 
 ```shell
 npm install
 npm run build
 ```
 
-Il file destinato a Home Assistant e HACS viene generato in
-`dist/thermomatrix-card.js`.
+The Home Assistant and HACS distributable is generated at:
 
-## Prova manuale in Home Assistant
+```text
+dist/thermomatrix-card.js
+```
 
-1. Copiare `dist/thermomatrix-card.js` in
-   `/config/www/thermomatrix-card.js`.
-2. Aggiungere una risorsa JavaScript di tipo modulo con URL
-   `/local/thermomatrix-card.js`.
-3. Aggiungere una nuova card scegliendo **ThermoMatrix Card** dall'editor,
-   oppure usare uno degli esempi YAML riportati sopra.
-4. Dopo ogni aggiornamento del file, ricaricare completamente il browser per
-   evitare la cache della risorsa precedente.
+---
 
-## Distribuzione
+## Known Limitations
 
-Il repository finale conterrà `hacs.json` nella radice e
-`dist/thermomatrix-card.js`, come richiesto da HACS per le card Dashboard.
+- The project is still evolving and configuration options may change.
+- Installation currently requires adding the repository manually to HACS.
+- Compatibility has not yet been documented across multiple Home Assistant versions.
+- The visual result depends on the features exposed by the selected climate entity.
 
-## Licenza
+---
 
-Distribuito con licenza [MIT](LICENSE).
+## License
+
+Released under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+This project is part of the **[iSSU Open Homelab ecosystem](https://github.com/issu-lab/Open-Homelab)**.
+
+</div>
