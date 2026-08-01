@@ -1,6 +1,6 @@
 {
   "name": "thermomatrix-card",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "A modular LCD-style climate card for Home Assistant",
   "type": "module",
   "scripts": {
