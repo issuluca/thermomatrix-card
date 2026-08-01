@@ -1083,7 +1083,7 @@ const st = Ut(class extends Rt {
       animation: none;
     }
   }
-`, It = "0.4.4", Dt = /* @__PURE__ */ new Set(["heating", "cooling", "drying", "fan"]), it = ["-", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"], rt = {
+`, It = "0.4.5", Dt = /* @__PURE__ */ new Set(["heating", "cooling", "drying", "fan"]), it = ["-", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"], rt = {
   off: { icon: "mdi:power", color: "#94a3b8" },
   heat: { icon: "mdi:fire", color: "#f97316" },
   cool: { icon: "mdi:snowflake", color: "#1d4ed8" },
