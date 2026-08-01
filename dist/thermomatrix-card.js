@@ -552,7 +552,9 @@ const st = Ut(class extends Rt {
   }
 
   .layout {
-    display: grid;
+    display: flex;
+    min-height: 380px;
+    flex-direction: column;
     gap: 10px;
   }
 
@@ -1048,7 +1050,11 @@ const st = Ut(class extends Rt {
   }
 
   .brand {
-    margin-top: 4px;
+    display: flex;
+    min-height: 18px;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
     color: var(--secondary-text-color);
     font-family: Arial, Helvetica, sans-serif;
@@ -1077,7 +1083,7 @@ const st = Ut(class extends Rt {
       animation: none;
     }
   }
-`, It = "0.4.3", Dt = /* @__PURE__ */ new Set(["heating", "cooling", "drying", "fan"]), it = ["-", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"], rt = {
+`, It = "0.4.4", Dt = /* @__PURE__ */ new Set(["heating", "cooling", "drying", "fan"]), it = ["-", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"], rt = {
   off: { icon: "mdi:power", color: "#94a3b8" },
   heat: { icon: "mdi:fire", color: "#f97316" },
   cool: { icon: "mdi:snowflake", color: "#1d4ed8" },
