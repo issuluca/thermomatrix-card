@@ -25,7 +25,9 @@ export const thermoMatrixStyles = css`
   }
 
   .layout {
-    display: grid;
+    display: flex;
+    min-height: 380px;
+    flex-direction: column;
     gap: 10px;
   }
 
@@ -521,7 +523,11 @@ export const thermoMatrixStyles = css`
   }
 
   .brand {
-    margin-top: 4px;
+    display: flex;
+    min-height: 18px;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
     color: var(--secondary-text-color);
     font-family: Arial, Helvetica, sans-serif;
